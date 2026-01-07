@@ -3,7 +3,7 @@ import Image from 'next/image';
 export default function Home() {
   return (
     <div>
-      <main className='bg-red-500'>
+      <main className="bg-red-500">
         <Image src="/next.svg" alt="Next.js logo" width={100} height={20} priority />
         <div>
           <h1>Non-opinionated TypeScript starter for Next.js</h1>

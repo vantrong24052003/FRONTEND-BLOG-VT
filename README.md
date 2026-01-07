@@ -35,10 +35,12 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.1.1. Trang đăng nhập
 
 **Mục đích:**
+
 - Xác thực người viết
 - Ngăn truy cập trái phép vào khu vực quản trị
 
 **Chức năng:**
+
 - Nhập email và mật khẩu
 - Chỉ khi đăng nhập thành công mới được truy cập các trang quản trị khác
 - Hệ thống chỉ tồn tại một tài khoản Admin duy nhất
@@ -46,9 +48,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.1.2. Trang danh sách bài viết
 
 **Mục đích:**
+
 - Quản lý toàn bộ bài blog trong hệ thống
 
 **Chức năng:**
+
 - Hiển thị danh sách bài viết
 - Hiển thị trạng thái bài viết (nháp hoặc đã đăng)
 - Cho phép mở bài viết để chỉnh sửa
@@ -57,9 +61,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.1.3. Trang tạo bài viết
 
 **Mục đích:**
+
 - Tạo một bài blog mới
 
 **Chức năng:**
+
 - Nhập tiêu đề bài viết
 - Soạn nội dung bài viết theo dạng các khối nội dung
 - Lưu bài viết ở trạng thái nháp
@@ -67,9 +73,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.1.4. Trang chỉnh sửa bài viết
 
 **Mục đích:**
+
 - Chỉnh sửa bài blog đã tồn tại
 
 **Chức năng:**
+
 - Hiển thị nội dung bài viết hiện tại
 - Cho phép chỉnh sửa tiêu đề và nội dung
 - Lưu lại thay đổi
@@ -80,9 +88,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.1.5. Trang xem trước bài viết
 
 **Mục đích:**
+
 - Xem trước cách bài viết sẽ được hiển thị trước khi đăng
 
 **Chức năng:**
+
 - Hiển thị nội dung bài viết theo đúng thứ tự khối nội dung
 - Chỉ tồn tại trong khu vực Admin
 - Không hiển thị công khai
@@ -93,9 +103,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.2.1. Trang danh sách bài blog
 
 **Mục đích:**
+
 - Hiển thị các bài blog đã được đăng
 
 **Chức năng:**
+
 - Hiển thị tiêu đề bài viết
 - Hiển thị mô tả ngắn
 - Chỉ hiển thị các bài có trạng thái đã đăng
@@ -103,9 +115,11 @@ Hai khu vực này là hai ứng dụng độc lập, không dùng chung giao di
 #### 3.2.2. Trang chi tiết bài blog
 
 **Mục đích:**
+
 - Hiển thị nội dung chi tiết của một bài blog
 
 **Chức năng:**
+
 - Hiển thị tiêu đề bài viết
 - Hiển thị nội dung bài viết theo đúng thứ tự các khối nội dung
 - Mỗi bài viết có một URL cố định
@@ -131,6 +145,7 @@ Admin và Client không truy cập trực tiếp vào Database.
 API Server là tầng trung gian duy nhất giữa ứng dụng và Database.
 
 **API chịu trách nhiệm:**
+
 - Nhận dữ liệu bài viết từ Admin
 - Lưu dữ liệu bài viết vào Database
 - Cung cấp dữ liệu bài viết cho Client
@@ -142,6 +157,7 @@ API Server là tầng trung gian duy nhất giữa ứng dụng và Database.
 Database chỉ có nhiệm vụ lưu trữ dữ liệu.
 
 **Database:**
+
 - Lưu bài blog
 - Lưu trạng thái bài viết
 
@@ -154,6 +170,7 @@ Database chỉ có nhiệm vụ lưu trữ dữ liệu.
 ### 5.1. Cấu trúc bài blog
 
 Một bài blog bao gồm:
+
 - Tiêu đề
 - Trạng thái bài viết
 - Danh sách các khối nội dung
@@ -163,11 +180,13 @@ Một bài blog bao gồm:
 Nội dung bài viết được tổ chức theo dạng danh sách phẳng các khối nội dung.
 
 **Mỗi khối nội dung:**
+
 - Có một loại riêng (ví dụ: chữ, hình ảnh, đoạn code)
 - Có dữ liệu tương ứng với loại khối
 - Có thứ tự cố định
 
 **Các khối nội dung:**
+
 - Không được lồng nhau
 - Không được tự động thay đổi thứ tự
 - Thứ tự lưu trữ quyết định thứ tự hiển thị
@@ -181,6 +200,7 @@ Nội dung bài viết được tổ chức theo dạng danh sách phẳng các 
 ### 6.1. Admin Application
 
 Admin Application chỉ bao gồm các nhóm chức năng sau:
+
 - Xác thực người dùng
 - Quản lý bài blog
 - Soạn nội dung bài blog
@@ -191,6 +211,7 @@ Admin Application chỉ bao gồm các nhóm chức năng sau:
 ### 6.2. Client Application
 
 Client Application chỉ bao gồm các nhóm chức năng sau:
+
 - Hiển thị danh sách bài blog
 - Hiển thị chi tiết bài blog
 
@@ -215,37 +236,45 @@ Client Application chỉ bao gồm các nhóm chức năng sau:
 ## 8. CÔNG NGHỆ VÀ THƯ VIỆN BẮT BUỘC
 
 ### 8.1. Admin Application (Next.js)
+
 **Framework & Core:** Next.js 15+ (App Router - bắt buộc), TypeScript (bắt buộc), React 19 | **Styling:** Tailwind CSS (bắt buộc), shadcn/ui (bắt buộc) | **Form Handling:** React Hook Form (bắt buộc), Zod (bắt buộc) | **Content Editor:** Tiptap v2 (bắt buộc - khuyến khích nhất) | **HTTP Client:** fetch built-in (bắt buộc) | **Authentication:** Auth.js v5 (NextAuth v5 - bắt buộc), JWT | **State Management:** Zustand (bắt buộc)
 
 ### 8.2. Client Application (Next.js)
+
 **Framework & Core:** Next.js 15+ (App Router - bắt buộc), TypeScript (bắt buộc), React 19 | **Styling:** Tailwind CSS (bắt buộc) | **Content Rendering:** Tiptap renderer (bắt buộc) | **SEO:** Built-in Metadata API (bắt buộc) | **HTTP Client:** fetch built-in (bắt buộc) | **Image:** next/image (bắt buộc)
 
 ### 8.3. API Server (NestJS)
+
 **Framework & Core:** NestJS 10+, TypeScript, Node.js 20 LTS (bắt buộc) | **Database:** PostgreSQL 16+ (bắt buộc) | **ORM:** Prisma 5+ (bắt buộc) | **Authentication:** @nestjs/jwt, @nestjs/passport, passport-jwt, bcrypt (tất cả bắt buộc) | **Validation:** class-validator, class-transformer (bắt buộc) | **Configuration:** @nestjs/config (bắt buộc) | **CORS:** Enabled trong NestJS (bắt buộc) | **Documentation:** @nestjs/swagger (khuyến khích mạnh)
 
 ### 8.4. Development Tools
+
 **Version Control:** Git (bắt buộc) | **Package Manager:** pnpm (bắt buộc - nhanh nhất) | **Code Quality:** ESLint (bắt buộc), Prettier (bắt buộc) | **API Testing:** Thunder Client (khuyến khích) | **Database GUI:** Prisma Studio (bắt buộc - built-in)
 
 ---
 
 ## 9. CẤU TRÚC DATABASE
 
-### 9.1. Bảng chính (CORE TABLES)
+### 9.1. Danh sách bảng (7 TABLES)
 
 **1. users** - Quản lý tài khoản admin/editor
+
 ```
-id (uuid, pk), email (varchar, unique), password_hash (varchar), name (varchar), 
-role (admin | editor), created_at, updated_at
+id (uuid, pk), email (varchar, unique), password (varchar), name (varchar),
+role (admin | editor), created_at (timestamp), updated_at (timestamp)
 ```
 
 **2. posts** - LINH HỒN HỆ THỐNG
+
 ```
-id (uuid, pk), title (varchar), slug (varchar, unique), excerpt (text), 
-thumbnail_url (varchar), status (draft | published | archived), blocks (jsonb), 
-author_id (uuid, fk -> users.id), published_at (timestamp), created_at, updated_at
+id (uuid, pk), title (varchar), slug (varchar, unique), excerpt (text),
+thumbnail_url (varchar), status (draft | published | archived), blocks (jsonb),
+user_id (uuid, fk -> users.id), published_at (timestamp),
+created_at (timestamp), updated_at (timestamp)
 ```
 
 **Cấu trúc blocks (JSONB):**
+
 ```json
 [
   { "type": "heading", "data": { "text": "Giới thiệu" } },
@@ -256,50 +285,58 @@ author_id (uuid, fk -> users.id), published_at (timestamp), created_at, updated_
 ]
 ```
 
-**3. categories** - Phân loại bài viết
+**3. post_versions** - Version control cho bài viết
+
 ```
-id (uuid, pk), name (varchar), slug (varchar, unique), created_at
+id (uuid, pk), post_id (uuid, fk -> posts.id), blocks (jsonb),
+user_id (uuid, fk -> users.id)
 ```
 
-**4. post_categories** - Many-to-many relationship
+> Cho phép: Undo, xem lịch sử chỉnh sửa, preview version
+
+**4. categories** - Phân loại bài viết
+
+```
+id (uuid, pk), name (varchar), slug (varchar, unique),
+created_at (timestamp), updated_at (timestamp)
+```
+
+**5. post_categories** - Many-to-many relationship
+
 ```
 post_id (uuid, fk -> posts.id), category_id (uuid, fk -> categories.id)
 ```
 
-**5. tags** - Gắn thẻ bài viết
+**6. tags** - Gắn thẻ bài viết
+
 ```
-id (uuid, pk), name (varchar), slug (varchar, unique)
+id (uuid, pk), name (varchar), slug (varchar, unique),
+created_at (timestamp), updated_at (timestamp)
 ```
 
-**6. post_tags** - Many-to-many relationship
+**7. post_tags** - Many-to-many relationship
+
 ```
 post_id (uuid, fk -> posts.id), tag_id (uuid, fk -> tags.id)
 ```
 
-### 9.2. Bảng hỗ trợ (OPTIONAL nhưng nên có)
+### 9.2. Quan hệ tổng kết
 
-**7. post_versions** - Version control cho bài viết
-```
-id (uuid, pk), post_id (uuid, fk -> posts.id), blocks (jsonb), 
-created_at, created_by (uuid, fk -> users.id)
-```
-> Cho phép: Undo, xem lịch sử chỉnh sửa, preview version
+- User 1 → n Post (qua user_id)
+- Post 1 → n PostVersion (qua post_id)
+- User 1 → n PostVersion (qua user_id)
+- Post n → n Category (qua post_categories)
+- Post n → n Tag (qua post_tags)
 
-**8. media** - Quản lý file upload
-```
-id (uuid, pk), url (varchar), type (image | video), size (int), 
-created_at, uploaded_by (uuid, fk -> users.id)
-```
+### 9.3. Ràng buộc và Index
 
-### 9.3. Quan hệ tổng kết
-- User 1 → n Post
-- Post n → n Category
-- Post n → n Tag
-- Post 1 → n PostVersion
-- Post 1 → n Media
+- **Unique constraints**: email (users), slug (posts, categories, tags)
+- **Foreign keys**: user_id, post_id, category_id, tag_id
+- **Indexes**: Tự động trên primary keys và foreign keys; unique indexes trên các trường unique
 
 ### 9.4. Ưu điểm của cấu trúc này
-✅ Không lock UI - thay đổi editor không cần đổi DB | ✅ SEO tốt với slug, excerpt, thumbnail | ✅ Linh hoạt - mở rộng sang course, landing page | ✅ Version control - theo dõi lịch sử thay đổi | ✅ Phân quyền rõ ràng - admin/editor roles
+
+✅ Không lock UI - thay đổi editor không cần đổi DB | ✅ SEO tốt với slug, excerpt, thumbnail | ✅ Linh hoạt - mở rộng sang course, landing page | ✅ Version control - theo dõi lịch sử thay đổi | ✅ Phân quyền rõ ràng - admin/editor roles | ✅ JSONB blocks - lưu trữ nội dung linh hoạt, không phụ thuộc HTML
 
 ---
 
