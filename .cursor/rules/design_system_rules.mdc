@@ -1,0 +1,1339 @@
+# Design System Rules for Figma Integration
+
+> **Purpose**: This document provides comprehensive rules for integrating Figma designs into the blog frontend codebase using Model Context Protocol (MCP).
+
+## 1. Token Definitions
+
+### Color System
+
+**Location**: `src/app/globals.css` (lines 47-114)
+
+**Format**: CSS Custom Properties with OKLCH color space
+
+**Structure**:
+- Light mode tokens defined in `:root` pseudo-class
+- Dark mode tokens defined in `.dark` class
+- All colors use `oklch()` format for perceptual uniformity
+- Tailwind CSS v4 theme configuration maps these tokens
+
+**Token Categories**:
+
+```css
+/* Semantic Colors (Light Mode) */
+--background      /* Main background color */
+--foreground      /* Primary text color */
+--card            /* Card/panel backgrounds */
+--card-foreground /* Text on cards */
+--popover         /* Dropdown/popover backgrounds */
+--primary         /* Primary action color */
+--secondary       /* Secondary action color */
+--muted           /* Muted/disabled backgrounds */
+--accent          /* Accent/highlight color */
+--destructive     /* Error/danger states */
+--border          /* Border color */
+--input           /* Input field backgrounds */
+--ring            /* Focus ring color */
+
+/* Chart Colors (for data visualization) */
+--chart-1 through --chart-5
+
+/* Sidebar Colors (for admin layout) */
+--sidebar, --sidebar-foreground, --sidebar-primary, etc.
+```
+
+**Figma Integration Rules**:
+1. Map Figma color styles to CSS custom properties using OKLCH values
+2. Use semantic naming (e.g., `--primary` not `--blue-500`)
+3. Ensure light/dark mode pairs exist for all semantic colors
+4. Reference colors in Tailwind classes: `bg-background`, `text-foreground`, `border-primary`
+
+**Example Token Mapping**:
+```typescript
+// When generating components, use these semantic mappings:
+// Figma: "Primary/Blue" → CSS: --primary → Tailwind: bg-primary
+// Figma: "Surface/Light" → CSS: --card → Tailwind: bg-card
+```
+
+### Spacing Scale
+
+**Location**: Built into Tailwind CSS v4
+
+**Available Spacing**:
+- Uses Tailwind's default spacing scale (0.25rem increments)
+- Custom spacing can be added via theme extension if needed
+
+**Usage in Components**:
+```tsx
+className="p-4" // 1rem padding
+className="gap-8" // 2rem gap
+className="mx-auto" // Center horizontally
+```
+
+### Border Radius
+
+**Location**: `src/app/globals.css` (lines 47-80)
+
+**Token Structure**:
+```css
+--radius: 0.625rem; /* Base radius variable */
+
+/* Computed radius tokens */
+--radius-sm: calc(var(--radius) - 4px);
+--radius-md: calc(var(--radius) - 2px);
+--radius-lg: var(--radius);
+--radius-xl: calc(var(--radius) + 4px);
+--radius-2xl: calc(var(--radius) + 8px);
+--radius-3xl: calc(var(--radius) + 12px);
+--radius-4xl: calc(var(--radius) + 16px);
+```
+
+**Tailwind Usage**:
+```tsx
+className="rounded-lg"  // Uses --radius-lg
+className="rounded-xl"  // Uses --radius-xl
+className="rounded-2xl" // Uses --radius-2xl
+```
+
+### Typography
+
+**Font Loading**: `src/app/layout.tsx` (lines 7-10)
+
+**Current Font**: Geist Sans (Google Fonts)
+```tsx
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+```
+
+**Font Variables**:
+- CSS variable: `--font-geist-sans`
+- Applied via `className` attribute on body element
+- Use `font-sans` Tailwind class to apply
+
+**Figma Integration Rules**:
+1. Match Figma text styles to Tailwind's typography scale:
+   - `text-xs` (0.75rem / 12px)
+   - `text-sm` (0.875rem / 14px)
+   - `text-base` (1rem / 16px)
+   - `text-lg` (1.125rem / 18px)
+   - `text-xl` (1.25rem / 20px)
+   - `text-2xl` through `text-9xl` (larger sizes)
+2. Use font weight utilities: `font-light`, `font-normal`, `font-medium`, `font-semibold`, `font-bold`
+3. Apply font variable: Add `font-sans` class to all text elements
+
+**Example**:
+```tsx
+<h1 className="text-4xl font-bold">Title</h1>
+<p className="text-base text-muted-foreground">Body text</p>
+```
+
+---
+
+## 2. Component Library
+
+### Architecture
+
+**Framework**: React 19 with TypeScript
+**Component Location**: `src/components/` (to be created)
+**UI Component Location**: `src/components/ui/` (for shadcn/ui components)
+
+**Current State**:
+- No custom components yet (fresh starter template)
+- shadcn/ui configured but no components installed
+- Ready for component generation from Figma
+
+### Component Structure Pattern
+
+**File Organization**:
+```
+src/components/
+├── ui/              # shadcn/ui components (auto-generated)
+│   ├── button.tsx
+│   ├── card.tsx
+│   └── ...
+├── admin/           # Admin-specific components
+│   ├── PostEditor.tsx
+│   └── PostList.tsx
+├── client/          # Client-specific components
+│   ├── PostCard.tsx
+│   └── PostList.tsx
+└── shared/          # Shared utilities
+    ├── Header.tsx
+    └── Footer.tsx
+```
+
+### Component Naming Conventions
+
+1. **PascalCase** for component files: `PostCard.tsx`
+2. **kebab-case** for component directories: `post-card/`
+3. Use descriptive names based on function, not appearance:
+   - ✅ `PostList.tsx`
+   - ❌ `GridWithCards.tsx`
+
+### Component Props Pattern
+
+**Use TypeScript interfaces for all props**:
+```tsx
+interface PostCardProps {
+  title: string;
+  excerpt: string;
+  coverImage?: string; // Optional props
+  publishedAt: Date;
+}
+
+export function PostCard({ title, excerpt, coverImage, publishedAt }: PostCardProps) {
+  return (
+    <article className="card">
+      {/* Component implementation */}
+    </article>
+  );
+}
+```
+
+### Class Name Merging
+
+**Utility**: `src/lib/utils.ts` (lines 4-6)
+
+**Function**: `cn()` - merges Tailwind classes intelligently
+```tsx
+import { cn } from '@/lib/utils';
+
+interface ButtonProps {
+  variant?: 'primary' | 'secondary';
+  className?: string;
+}
+
+export function Button({ variant = 'primary', className }: ButtonProps) {
+  return (
+    <button
+      className={cn(
+        'base-styles',
+        variant === 'primary' && 'bg-primary text-primary-foreground',
+        variant === 'secondary' && 'bg-secondary text-secondary-foreground',
+        className // Allows overriding classes
+      )}
+    />
+  );
+}
+```
+
+### Component Variants
+
+**Library**: `class-variance-authority` (CVA)
+
+**Pattern for variant components**:
+```tsx
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  // Base classes applied to all variants
+  'inline-flex items-center justify-center rounded-md font-medium',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+      },
+      size: {
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-10 px-4',
+        lg: 'h-12 px-6 text-lg',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+    },
+  }
+);
+
+interface ButtonProps extends VariantProps<typeof buttonVariants> {
+  className?: string;
+}
+```
+
+### Figma-to-Code Component Rules
+
+1. **Analyze component variants** in Figma (e.g., Button: primary, secondary, disabled states)
+2. **Create CVA variants** matching Figma component properties
+3. **Use semantic color tokens**, not hardcoded colors
+4. **Ensure responsive behavior** with Tailwind breakpoints (sm:, md:, lg:, xl:)
+5. **Add hover/focus states** matching Figma prototypes
+
+**Example Mapping**:
+```
+Figma Component: "Button / Primary / Hover"
+↓
+React Component: <Button variant="primary" className="hover:...">
+```
+
+---
+
+## 3. Frameworks & Libraries
+
+### Core Framework
+
+**Next.js 16.1.1** with App Router
+- React 19.2.3
+- TypeScript 5.9.3
+- Server Components by default
+- Client Components: Add `'use client'` directive
+
+**Build System**: Turbopack (Next.js default)
+- Development: `pnpm dev`
+- Production: `pnpm build`
+- Bundle analysis: `pnpm build:analyze`
+
+### Styling Framework
+
+**Tailwind CSS 4.1.18**
+- Configuration: `@tailwindcss/postcss` plugin
+- No separate `tailwind.config.ts` (v4 uses CSS-first config)
+- Theme defined in `src/app/globals.css` within `@theme inline` block
+
+**Key Features**:
+- CSS variables for theming (light/dark mode)
+- Custom variant for dark mode: `@custom-variant dark (&:is(.dark *))`
+- PostCSS processing via `postcss.config.mjs`
+
+**Responsive Design**:
+```tsx
+// Mobile-first approach
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+  {/* Responsive grid layout */}
+</div>
+```
+
+### UI Component Library
+
+**shadcn/ui 3.6.3** (New York style)
+- Location: `src/components/ui/`
+- Configuration: `components.json`
+- Icon library: Lucide React
+- Base color: Gray
+- CSS variables: Enabled
+
+**Adding shadcn Components**:
+```bash
+# When design requires UI components
+npx shadcn@latest add button
+npx shadcn@latest add card
+npx shadcn@latest add input
+```
+
+**Features**:
+- Copy-paste components (not npm package)
+- Full customization control
+- Built on Radix UI primitives
+- Class variance authority for variants
+- TypeScript with proper types
+
+### Icon System
+
+**Library**: Lucide React 0.562.0
+
+**Usage Pattern**:
+```tsx
+import { ChevronLeft, Home, Settings, User } from 'lucide-react';
+
+<Home className="h-5 w-5" />
+<ChevronLeft className="h-4 w-4" />
+```
+
+**Icon Sizing** (Tailwind classes):
+- `h-4 w-4` (1rem / 16px) - Small icons
+- `h-5 w-5` (1.25rem / 20px) - Default icons
+- `h-6 w-6` (1.5rem / 24px) - Large icons
+
+**Figma Icon Rules**:
+1. Check if Figma icon exists in Lucide React
+2. If yes, use Lucide icon component
+3. If no, export as SVG and place in `src/assets/icons/`
+4. Create SVG component:
+   ```tsx
+   // src/components/icons/CustomIcon.tsx
+   export function CustomIcon({ className = "h-5 w-5" }: { className?: string }) {
+     return (
+       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+         {/* SVG paths */}
+       </svg>
+     );
+   }
+   ```
+
+### Form Handling
+
+**Planned Stack** (not yet implemented):
+- React Hook Form for form state
+- Zod 4.3.4 for validation (already installed)
+- shadcn form components for UI
+
+**Pattern for Forms**:
+```tsx
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export function LoginForm() {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  // Form implementation
+}
+```
+
+### State Management
+
+**Planned**: Zustand (not yet installed)
+
+**Usage Pattern** (for reference when implementing):
+```tsx
+import { create } from 'zustand';
+
+interface PostStore {
+  posts: Post[];
+  fetchPosts: () => Promise<void>;
+}
+
+export const usePostStore = create<PostStore>((set) => ({
+  posts: [],
+  fetchPosts: async () => {
+    const response = await fetch('/api/posts');
+    const posts = await response.json();
+    set({ posts });
+  },
+}));
+```
+
+---
+
+## 4. Asset Management
+
+### Image Storage
+
+**Location**: `public/` directory
+
+**Current Assets**:
+- `public/next.svg` (Next.js logo example)
+
+**Naming Convention**:
+- Use kebab-case: `blog-post-cover.jpg`
+- Organize by type: `public/images/`, `public/icons/`, etc.
+
+### Image Optimization
+
+**Method**: Next.js Image Component
+
+**Usage Pattern**:
+```tsx
+import Image from 'next/image';
+
+// Local images in public directory
+<Image
+  src="/images/blog-post-cover.jpg"
+  alt="Blog post cover image"
+  width={800}
+  height={600}
+  priority // For above-the-fold images
+/>
+
+// External images (requires next.config.ts domain configuration)
+<Image
+  src="https://cdn.example.com/image.jpg"
+  alt="External image"
+  width={800}
+  height={600}
+/>
+```
+
+**Features**:
+- Automatic format optimization (WebP, AVIF)
+- Responsive sizing with `sizes` prop
+- Lazy loading by default
+- Blur placeholder support
+
+**Image Dimensions**:
+- Always specify `width` and `height` to prevent layout shift
+- Use aspect ratio utilities: `aspect-video`, `aspect-square`, `aspect-[4/3]`
+
+### CDN Configuration
+
+**Current**: No CDN configured
+
+**For Production**:
+- Consider Vercel Blob Storage or AWS S3 for uploads
+- Use Next.js Image Optimization with remote patterns
+- Configure domains in `next.config.ts`:
+  ```ts
+  const nextConfig: NextConfig = {
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'cdn.example.com',
+          port: '',
+          pathname: '/**',
+        },
+      ],
+    },
+  };
+  ```
+
+### Asset Import Strategy
+
+**For Images**:
+- ✅ Use `import Image from 'next/image'` with `src` path
+- ❌ Don't use `<img>` tag
+- ❌ Don't import images as modules (use public directory)
+
+**For SVGs**:
+- Inline as React components for icons
+- Use Next.js Image for decorative SVGs
+- Optimize with SVGR if needed
+
+---
+
+## 5. Icon System
+
+### Primary Icon Library
+
+**Library**: Lucide React 0.562.0
+
+**Configuration**: `components.json` (line 13)
+```json
+{
+  "iconLibrary": "lucide"
+}
+```
+
+### Usage Patterns
+
+**Direct Import**:
+```tsx
+import { Bell, Search, User, Menu } from 'lucide-react';
+
+<Bell className="h-5 w-5 text-muted-foreground" />
+<Search className="h-4 w-4" />
+```
+
+**Sizing Standards**:
+```tsx
+// Extra small: 0.75rem (12px)
+className="h-3 w-3"
+
+// Small: 1rem (16px)
+className="h-4 w-4"
+
+// Default: 1.25rem (20px)
+className="h-5 w-5"
+
+// Large: 1.5rem (24px)
+className="h-6 w-6"
+
+// Extra large: 2rem (32px)
+className="h-8 w-8"
+```
+
+**Coloring**:
+```tsx
+// Inherit text color
+<Icon className="h-5 w-5" />
+
+// Use semantic color
+<Icon className="h-5 w-5 text-primary" />
+
+// Muted state
+<Icon className="h-5 w-5 text-muted-foreground" />
+```
+
+### Custom Icons
+
+**When Figma uses icons not in Lucide**:
+
+1. **Export from Figma**:
+   - Format: SVG
+   - Size: 24x24px (standard icon size)
+   - Stroke width: 2px (to match Lucide)
+
+2. **Create component**:
+   ```tsx
+   // src/components/icons/CustomIcon.tsx
+   interface CustomIconProps {
+     className?: string;
+   }
+
+   export function CustomIcon({ className = "h-5 w-5" }: CustomIconProps) {
+     return (
+       <svg
+         xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         strokeWidth="2"
+         strokeLinecap="round"
+         strokeLinejoin="round"
+         className={className}
+       >
+         {/* Insert SVG paths here */}
+       </svg>
+     );
+   }
+   ```
+
+3. **Use consistently**:
+   ```tsx
+   import { CustomIcon } from '@/components/icons/CustomIcon';
+
+   <CustomIcon className="h-5 w-5" />
+   ```
+
+### Icon Naming Convention
+
+**Match Figma layer names**:
+- Figma: "icon/home" → Component: `HomeIcon` or `Home`
+- Figma: "icon/search" → Component: `SearchIcon` or `Search`
+- Use descriptive, action-based names
+
+---
+
+## 6. Styling Approach
+
+### Methodology
+
+**Primary**: Utility-First CSS with Tailwind CSS 4
+
+**Key Principles**:
+1. Use Tailwind classes for 95% of styling
+2. Create reusable components for repeated patterns
+3. Use CSS variables for theming (colors, spacing)
+4. Avoid inline styles
+5. Use `cn()` utility for conditional classes
+
+### Global Styles
+
+**Location**: `src/app/globals.css`
+
+**Structure**:
+```css
+@import "tailwindcss";           /* Tailwind v4 import */
+@import "tw-animate-css";        /* Animation utilities */
+
+@custom-variant dark (...);      /* Dark mode support */
+
+@theme inline {
+  /* Tailwind theme configuration */
+  /* Maps CSS variables to Tailwind tokens */
+}
+
+:root {
+  /* Light mode color tokens */
+}
+
+.dark {
+  /* Dark mode color tokens */
+}
+
+@layer base {
+  /* Global base styles */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+### Dark Mode Implementation
+
+**Method**: Class-based dark mode
+
+**Toggle Pattern** (for future implementation):
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+export function ThemeToggle() {
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+  }, [theme]);
+
+  return (
+    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+      Toggle theme
+    </button>
+  );
+}
+```
+
+**CSS Usage**:
+```tsx
+// Apply dark mode styles
+<div className="bg-background dark:bg-card">
+  <p className="text-foreground dark:text-card-foreground">
+    Content
+  </p>
+</div>
+```
+
+### Responsive Design
+
+**Breakpoints** (Tailwind defaults):
+```tsx
+// Mobile-first approach
+sm="640px"   // Small tablets
+md="768px"   // Tablets
+lg="1024px"  // Desktops
+xl="1280px"  // Large desktops
+2xl="1536px" // Extra large screens
+```
+
+**Pattern**:
+```tsx
+// Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {/* Content */}
+</div>
+```
+
+### Layout Patterns
+
+**Container**:
+```tsx
+<div className="container mx-auto px-4 max-w-7xl">
+  {/* Centered content with max width */}
+</div>
+```
+
+**Grid**:
+```tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {/* Responsive grid */}
+</div>
+```
+
+**Flexbox**:
+```tsx
+<div className="flex items-center justify-between gap-4">
+  {/* Horizontal layout */}
+</div>
+
+<div className="flex flex-col gap-4">
+  {/* Vertical layout */}
+</div>
+```
+
+### Component Styling Pattern
+
+**Best Practice**:
+```tsx
+// Base styles + variant styles + overrides
+<div className={cn(
+  "base-padding base-border",           // Always applied
+  variant === 'primary' && "bg-primary", // Conditional
+  className                              // User override
+)} />
+```
+
+**Example**:
+```tsx
+interface CardProps {
+  variant?: 'default' | 'elevated';
+  className?: string;
+  children: React.ReactNode;
+}
+
+export function Card({ variant = 'default', className, children }: CardProps) {
+  return (
+    <div
+      className={cn(
+        'rounded-lg border bg-card text-card-foreground shadow-sm',
+        variant === 'elevated' && 'shadow-md',
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+### Animation
+
+**Library**: `tw-animate-css` (installed)
+
+**Usage**:
+```tsx
+<div className="animate-fade-in">
+  {/* Fade in animation */}
+</div>
+
+<div className="animate-slide-up">
+  {/* Slide up animation */}
+</div>
+```
+
+**Custom Transitions**:
+```tsx
+<button className="transition-all duration-200 hover:scale-105 active:scale-95">
+  {/* Button with scale effect */}
+</button>
+```
+
+---
+
+## 7. Project Structure
+
+### Directory Organization
+
+```
+blog-fe/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── layout.tsx         # Root layout
+│   │   ├── page.tsx           # Home page
+│   │   ├── globals.css        # Global styles + design tokens
+│   │   ├── (admin)/           # Admin routes (planned)
+│   │   └── (client)/          # Client routes (planned)
+│   │
+│   ├── components/            # React components
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── admin/            # Admin-specific components
+│   │   ├── client/           # Client-specific components
+│   │   └── shared/           # Shared components
+│   │
+│   ├── lib/                  # Utility libraries
+│   │   ├── env/             # Environment variable schemas
+│   │   │   ├── client.ts    # Client-side env vars
+│   │   │   └── server.ts    # Server-side env vars
+│   │   └── utils.ts         # General utilities (cn function)
+│   │
+│   └── hooks/                # Custom React hooks (planned)
+│
+├── public/                   # Static assets
+│   └── images/              # Optimized images
+│
+├── components.json          # shadcn/ui configuration
+├── next.config.ts          # Next.js configuration
+├── postcss.config.mjs      # PostCSS + Tailwind config
+├── tsconfig.json           # TypeScript configuration
+└── package.json            # Dependencies
+```
+
+### Path Aliases
+
+**Configuration**: `tsconfig.json` (lines 28-32)
+
+```json
+{
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["./src/*"],
+    "@/public/*": ["./public/*"]
+  }
+}
+```
+
+**Usage in Imports**:
+```tsx
+// Instead of:
+import { Button } from '../../../components/ui/button';
+
+// Use:
+import { Button } from '@/components/ui/button';
+
+// For public assets:
+import Image from 'next/image';
+<Image src="/images/logo.png" /> // Use public/ prefix
+```
+
+### Feature Organization Pattern
+
+**For Admin Features**:
+```
+src/app/(admin)/
+├── posts/
+│   ├── page.tsx          # Post list
+│   ├── new/page.tsx      # Create post
+│   └── [id]/page.tsx     # Edit post
+└── login/page.tsx        # Admin login
+
+src/components/admin/
+├── PostEditor.tsx
+├── PostList.tsx
+└── Sidebar.tsx
+```
+
+**For Client Features**:
+```
+src/app/(client)/
+├── page.tsx             # Post list (home)
+└── posts/
+    └── [slug]/page.tsx  # Post detail
+
+src/components/client/
+├── PostCard.tsx
+├── PostList.tsx
+└── Header.tsx
+```
+
+**For Shared Logic**:
+```
+src/lib/
+├── api/                 # API client functions
+│   └── posts.ts
+├── validations/         # Zod schemas
+│   └── post.ts
+└── types/              # TypeScript types
+    └── post.ts
+```
+
+---
+
+## 8. Figma Integration Workflow
+
+### Step 1: Analyze Figma Design
+
+Before generating code:
+
+1. **Identify reusable components** (buttons, cards, inputs)
+2. **Map color styles** to CSS variables
+3. **Check typography** against Tailwind scale
+4. **Verify icon availability** in Lucide React
+5. **Note responsive behaviors** (mobile, tablet, desktop)
+
+### Step 2: Generate Component Code
+
+When using Figma MCP tools:
+
+**For Components**:
+```typescript
+// Use these parameters in get_design_context:
+{
+  clientLanguages: "typescript",
+  clientFrameworks: "react,tailwindcss",
+  // The generated code should:
+  // 1. Use Tailwind classes for styling
+  // 2. Reference CSS variables for colors
+  // 3. Include proper TypeScript types
+  // 4. Use semantic HTML elements
+  // 5. Support dark mode (when applicable)
+}
+```
+
+**For Icons**:
+1. Check if icon exists in Lucide React
+2. If yes: Use `lucide-react` import
+3. If no: Create SVG component in `src/components/icons/`
+
+### Step 3: Refine Generated Code
+
+**Checklist**:
+- [ ] Replace hardcoded colors with CSS variables
+- [ ] Ensure proper TypeScript types
+- [ ] Add responsive classes (sm:, md:, lg:)
+- [ ] Include dark mode variants
+- [ ] Use semantic HTML (article, section, nav)
+- [ ] Add accessible labels (aria-label, alt text)
+- [ ] Optimize images (use Next.js Image)
+- [ ] Test component in light and dark modes
+
+### Step 4: Component Registration
+
+**For shadcn/ui Components**:
+```bash
+# Install base component first
+npx shadcn@latest add button
+npx shadcn@latest add card
+
+# Then customize as needed
+```
+
+**For Custom Components**:
+```tsx
+// src/components/blog/PostCard.tsx
+export { PostCard };
+
+// Re-export from index (optional)
+// src/components/index.ts
+export * from './blog/PostCard';
+```
+
+### Step 5: Testing
+
+**Visual Testing**:
+1. Test in light mode
+2. Test in dark mode (add `dark` class to `<html>`)
+3. Test responsive breakpoints
+4. Verify interactive states (hover, focus, active)
+
+**Code Quality**:
+```bash
+pnpm type-check  # Verify TypeScript
+pnpm lint        # Check ESLint
+pnpm format      # Format with Prettier
+```
+
+---
+
+## 9. Code Examples
+
+### Example 1: Button Component
+
+```tsx
+// src/components/ui/button.tsx
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+      },
+      size: {
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-10 px-4',
+        lg: 'h-12 px-6 text-lg',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return (
+    <button
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
+```
+
+### Example 2: Card Component
+
+```tsx
+// src/components/ui/card.tsx
+import { cn } from '@/lib/utils';
+
+export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
+      {...props}
+    />
+  );
+}
+
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('flex flex-col space-y-1.5 p-6', className)} {...props} />
+  );
+}
+
+export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3 className={cn('text-2xl font-semibold leading-none tracking-tight', className)} {...props} />
+  );
+}
+
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('p-6 pt-0', className)} {...props} />;
+}
+```
+
+### Example 3: Blog Post Card
+
+```tsx
+// src/components/client/PostCard.tsx
+import Image from 'next/image';
+import { Calendar, User } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+interface PostCardProps {
+  title: string;
+  excerpt: string;
+  coverImage?: string;
+  publishedAt: Date;
+  author: string;
+  className?: string;
+}
+
+export function PostCard({
+  title,
+  excerpt,
+  coverImage,
+  publishedAt,
+  author,
+  className,
+}: PostCardProps) {
+  return (
+    <Card className={cn('overflow-hidden transition-shadow hover:shadow-lg', className)}>
+      {coverImage && (
+        <div className="relative aspect-video w-full">
+          <Image
+            src={coverImage}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        </div>
+      )}
+      <CardHeader>
+        <h3 className="text-xl font-semibold line-clamp-2">{title}</h3>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground line-clamp-3 mb-4">{excerpt}</p>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            <time dateTime={publishedAt.toISOString()}>
+              {publishedAt.toLocaleDateString()}
+            </time>
+          </div>
+          <div className="flex items-center gap-1">
+            <User className="h-4 w-4" />
+            <span>{author}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Example 4: Admin Post List
+
+```tsx
+// src/components/admin/PostList.tsx
+'use client';
+
+import Link from 'next/link';
+import { Pencil, Trash2, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+interface Post {
+  id: string;
+  title: string;
+  status: 'draft' | 'published' | 'archived';
+  updatedAt: Date;
+}
+
+interface PostListProps {
+  posts: Post[];
+  className?: string;
+}
+
+export function PostList({ posts, className }: PostListProps) {
+  return (
+    <div className={cn('space-y-4', className)}>
+      {posts.map((post) => (
+        <Card key={post.id}>
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold">{post.title}</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <span
+                  className={cn(
+                    'text-xs px-2 py-1 rounded-full',
+                    post.status === 'published' && 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+                    post.status === 'draft' && 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100',
+                    post.status === 'archived' && 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
+                  )}
+                >
+                  {post.status}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  Updated {post.updatedAt.toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={`/admin/posts/${post.id}/preview`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={`/admin/posts/${post.id}/edit`}>
+                  <Pencil className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## 10. Quick Reference
+
+### Common Tailwind Classes
+
+**Spacing**:
+- Padding: `p-4`, `px-6`, `py-2`
+- Margin: `m-4`, `mx-auto`, `-mt-2`
+- Gap: `gap-2`, `gap-x-4`, `gap-y-8`
+
+**Colors** (Semantic):
+- Background: `bg-background`, `bg-card`, `bg-primary`
+- Text: `text-foreground`, `text-muted-foreground`, `text-primary`
+- Border: `border-border`, `border-input`
+
+**Typography**:
+- Size: `text-sm`, `text-base`, `text-lg`, `text-xl`
+- Weight: `font-normal`, `font-medium`, `font-semibold`, `font-bold`
+- Alignment: `text-left`, `text-center`, `text-right`
+
+**Layout**:
+- Display: `flex`, `grid`, `block`, `inline-block`
+- Flex: `flex-col`, `items-center`, `justify-between`, `gap-4`
+- Grid: `grid-cols-3`, `grid-template-columns`
+
+**Borders**:
+- Radius: `rounded-md`, `rounded-lg`, `rounded-full`
+- Width: `border`, `border-2`, `border-t`
+
+**Shadows**:
+- `shadow-sm`, `shadow`, `shadow-md`, `shadow-lg`
+
+### Common Icon Imports
+
+```tsx
+import {
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Settings,
+  User,
+  Search,
+  Bell,
+  Menu,
+  X,
+  Check,
+  Plus,
+  Minus,
+  Trash2,
+  Edit2,
+  Eye,
+  Calendar,
+  Clock,
+  Tag,
+  Folder,
+  FileText,
+  Image,
+  Link,
+  ExternalLink,
+} from 'lucide-react';
+```
+
+### Common Utility Functions
+
+```tsx
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+
+// Merge classes
+<div className={cn('base-class', conditionalClass, className)} />
+
+// Optimize images
+<Image src="/path" alt="Description" width={800} height={600} />
+```
+
+---
+
+## 11. Best Practices
+
+### DO:
+✅ Use semantic HTML elements
+✅ Reference CSS variables for colors
+✅ Include proper TypeScript types
+✅ Make components responsive by default
+✅ Support dark mode
+✅ Use Tailwind classes for 95% of styling
+✅ Import icons from `lucide-react`
+✅ Use Next.js Image for all images
+✅ Follow the component structure patterns
+✅ Test in both light and dark modes
+
+### DON'T:
+❌ Hardcode color values (use CSS variables)
+❌ Use inline styles (use Tailwind classes)
+❌ Skip TypeScript types
+❌ Forget responsive breakpoints
+❌ Use regular `<img>` tags (use Next.js Image)
+❌ Mix admin and client components
+❌ Create overly complex abstractions
+❌ Skip accessibility (aria-labels, alt text)
+
+---
+
+## 12. Version History
+
+- **v1.0** (2025-01-07): Initial design system rules for blog frontend project
+
+---
+
+## Appendix: Color Reference
+
+### Light Mode Colors
+```css
+--background: oklch(1 0 0)                                    /* White */
+--foreground: oklch(0.13 0.028 261.692)                       /* Nearly black */
+--primary: oklch(0.21 0.034 264.665)                          /* Dark blue */
+--secondary: oklch(0.967 0.003 264.542)                       /* Light gray */
+--muted: oklch(0.967 0.003 264.542)                          /* Light gray */
+--accent: oklch(0.967 0.003 264.542)                         /* Light gray */
+--destructive: oklch(0.577 0.245 27.325)                     /* Red */
+--border: oklch(0.928 0.006 264.531)                         /* Light gray */
+```
+
+### Dark Mode Colors
+```css
+--background: oklch(0.13 0.028 261.692)                       /* Nearly black */
+--foreground: oklch(0.985 0.002 247.839)                     /* Off-white */
+--primary: oklch(0.928 0.006 264.531)                        /* Off-white */
+--secondary: oklch(0.278 0.033 256.848)                      /* Dark gray */
+--muted: oklch(0.278 0.033 256.848)                         /* Dark gray */
+--accent: oklch(0.278 0.033 256.848)                        /* Dark gray */
+--destructive: oklch(0.704 0.191 22.216)                    /* Light red */
+--border: oklch(1 0 0 / 10%)                                /* Transparent white */
+```
