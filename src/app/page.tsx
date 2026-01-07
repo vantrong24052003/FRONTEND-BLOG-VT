@@ -1,20 +1,19 @@
-import Image from 'next/image';
+import { Header } from '@/components/client/landing/Header';
+import { Hero } from '@/components/client/landing/Hero';
+import { Achievements } from '@/components/client/landing/Achievements';
+import { Courses } from '@/components/client/landing/Courses';
+import { Footer } from '@/components/client/landing/Footer';
 
 export default function Home() {
   return (
-    <div>
-      <main className="bg-red-500">
-        <Image src="/next.svg" alt="Next.js logo" width={100} height={20} priority />
-        <div>
-          <h1>Non-opinionated TypeScript starter for Next.js</h1>
-          <p>Highly scalable foundation with the best DX. All the tools you need to build your Next project.</p>
-        </div>
-        <div>
-          <a href="https://joaopedro.dev" target="_blank" rel="noreferrer">
-            Created by Văn Trọng
-          </a>
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <Header />
+      <main>
+        <Hero />
+        <Achievements />
+        <Courses />
       </main>
+      <Footer />
     </div>
   );
 }
